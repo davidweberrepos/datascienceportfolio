@@ -4,3 +4,4 @@
 .Ruserdata
 /.ipynb_checkpoints/
 /00_python_intro/
+.DS_Store
