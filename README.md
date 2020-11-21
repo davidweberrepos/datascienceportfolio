@@ -1,6 +1,7 @@
 # Data Science Portfolio
 
 This repository represents some of my data science projects that I did in my freetime - often to learn new skills, domains and libraries.
+More to come - currently, I am focused on my master's thesis and work.
 
 ## Project Overview:
 Projects mostly contain an explorative data analysis (EDA) and sometimes modelling with different libraries.
@@ -11,4 +12,5 @@ Projects mostly contain an explorative data analysis (EDA) and sometimes modelli
 * Hote Cancellation Data: EDA and Feature Engineering
 * Titanic Dataset: EDA
 * Wine Quality: Using R for descriptive Data Analysis
+
 I plan on extending my data science project portfolio with further machine learning, deep learning and big data (Spark, Hadoop) projects.
