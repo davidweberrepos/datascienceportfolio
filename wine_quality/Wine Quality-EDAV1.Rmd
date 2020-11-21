@@ -1,0 +1,135 @@
+---
+title: "Wine Quality - EDA and first GLM model"
+author: "David Weber"
+date: "5/5/2020"
+output: html_document
+---
+##Load necessary packages
+```{r package_import, echo=FALSE, fig.height=25, fig.width=30, message=FALSE, warning=FALSE}
+require(dplyr)
+require(corrplot)
+require(caret)
+require(CORElearn)
+require(energy)
+```
+
+## Import File
+```{r file_import, echo=FALSE, fig.height=25, fig.width=30, message=FALSE, warning=FALSE}
+all_data = read.csv("data/winequality-white.csv", sep = ";")
+
+sapply(all_data, class)
+#all features are numeric features
+
+cat("There are", nrow(all_data), "rows.")
+```
+
+## Correlation Studies
+```{r correlations, echo=FALSE, fig.height=25, fig.width=30, message=FALSE, warning=FALSE}
+#Let's try pearson correlation first
+corr_spearman = cor(
+  all_data,
+  method = "spearman",
+  use = "pairwise.complete.obs"
+)
+
+corrplot(corr_spearman, 
+         title = "Numeric Feature Correlation - Spearman",
+         method = "square", 
+         order="hclust", 
+         hclust.method="single",
+         type="full", # lower, full
+         diag=F,
+         
+         # coefficients - set addCoef.col to NULL to disable
+         addCoef.col = "black", # NULL, "black"
+         addCoefasPercent = T,
+         number.cex = 5,
+         number.digits = 0,
+         
+         # lable text
+         tl.srt=45,
+         tl.cex = 5,    # size text lables
+         tl.col = 'black'
+)
+##volatile.acidity, chlorides, density and total.sulfur.dioxide correlate negatively
+##pH and alcohol correlate positively with quality
+
+#Let's try some different correlations as well
+#Relief
+reliefV = attrEval("quality",
+                   all_data,
+                   estimator = "ReliefFequalK",
+                   ReliefIterations = 50)
+reliefV
+##Relief seems to see only the strong positive correlation of alcohol
+
+#Disctance Correlation
+dis_corr = dcor(all_data$citric.acid, all_data$quality, index = 1.0)
+dis_corr
+```
+
+## Feature Engineering
+```{r feat_engin, echo=FALSE, fig.height=25, fig.width=30, message=FALSE, warning=FALSE}
+##Not much feature engineering to do, since it is a very tidy dataset
+##First try will be, to send all features in the dataset and see how the model performs
+
+#lets do a label target for binary classification
+all_data$label = ifelse(all_data$quality>5, "good", "bad")
+all_data$quality = NULL
+
+del_cols = c(
+  "density",
+  "residual.sugar",
+  #"alcohol",
+  "total.sulfur.dioxide"
+)
+
+all_data[, del_cols] = NULL
+
+```
+
+## Finalising datset
+```{r final_data, echo=FALSE, fig.height=25, fig.width=30, message=FALSE, warning=FALSE}
+set.seed(123)
+split1 = createDataPartition(all_data$label, p=2/3)[[1]]
+other = all_data[-split1,]
+split2 = createDataPartition(other$label, p = 1/2)[[1]]
+
+train_data = all_data[split1,]
+eval_data = other[split2,]
+test_data = other[-split2,]
+
+
+```
+
+
+## Modelling
+```{r modelling, echo=FALSE, fig.height=25, fig.width=30, message=FALSE, warning=FALSE}
+method = "glm" # Generalized Linear Model
+set.seed(890)
+tr_cntrl = trainControl(method = "cv",
+                        number = 20,
+                        verboseIter = T,
+                        classProbs = T,
+                        summaryFunction = twoClassSummary,
+                        savePredictions = T)
+
+model = train(label ~.,
+              data = train_data,
+              method = method,
+              trControl = tr_cntrl)
+
+```
+
+
+## Predicting
+```{r}
+# left to do
+```
+
+
+
+
+
+
+
